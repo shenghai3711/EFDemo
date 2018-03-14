@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace EFCRUD
 {
@@ -85,7 +84,16 @@ namespace EFCRUD
 
         #region 根据条件排序和查询
 
+        public List<Customers> GetListBy<TKey>(Expression<Func<Customers, bool>> whereLambda, Expression<Func<Customers, TKey>> orderLambda)
+        {
+            using (NorthwindEntities db = new NorthwindEntities())
+            {
+                return db.Customers.Where(whereLambda).OrderBy(orderLambda).ToList();
+            }
+        }
+
         #endregion
+
 
     }
 }
