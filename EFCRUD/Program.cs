@@ -84,11 +84,40 @@ namespace EFCRUD
 
         #region 根据条件排序和查询
 
+        /// <summary>
+        /// 根据条件排序和查询
+        /// </summary>
+        /// <typeparam name="TKey">排序字段类型</typeparam>
+        /// <param name="whereLambda">查询条件Lambda表达式</param>
+        /// <param name="orderLambda">排序条件Lambda表达式</param>
+        /// <returns></returns>
         public List<Customers> GetListBy<TKey>(Expression<Func<Customers, bool>> whereLambda, Expression<Func<Customers, TKey>> orderLambda)
         {
             using (NorthwindEntities db = new NorthwindEntities())
             {
                 return db.Customers.Where(whereLambda).OrderBy(orderLambda).ToList();
+            }
+        }
+
+        #endregion
+
+        #region 分页查询
+
+        /// <summary>
+        /// 分页查询
+        /// </summary>
+        /// <typeparam name="TKey">排序字段类型</typeparam>
+        /// <param name="pageIndex">页码</param>
+        /// <param name="pageSize">页容量</param>
+        /// <param name="whereLambda">条件Lambda表达式</param>
+        /// <param name="orderBy">排序Lambda表达式</param>
+        /// <returns></returns>
+        public List<Customers> GetPagedList<TKey>(int pageIndex, int pageSize, Expression<Func<Customers, bool>> whereLambda, Expression<Func<Customers, TKey>> orderBy)
+        {
+            using (NorthwindEntities db = new NorthwindEntities())
+            {
+                //分页注意：Skip 之前一定要OrderBy
+                return db.Customers.Where(whereLambda).OrderBy(orderBy).Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
             }
         }
 
