@@ -207,5 +207,80 @@ namespace EFCRUD
 
         #endregion
 
+        #region 批处理1 新增+修改+删除
+
+        static void SaveBatched()
+        {
+            //1.新增数据
+            Customers customer1 = new Customers
+            {
+                CustomerID = "test1",
+                Address = "重庆",
+                City = "重庆",
+                Phone = "14512457878",
+                CompanyName = "微软",
+                ContactName = "user1"
+            };
+            Customers customer2 = new Customers
+            {
+                CustomerID = "test2",
+                Address = "重庆",
+                City = "重庆",
+                Phone = "14512457878",
+                CompanyName = "微软",
+                ContactName = "user2"
+            };
+            using (NorthwindEntities db = new NorthwindEntities())
+            {
+                db.Customers.Add(customer1);
+                db.Customers.Add(customer2);
+
+                //2.修改数据
+                Customers customerEdit = new Customers { CustomerID = "test1", ContactName = "userEdit" };
+                DbEntityEntry<Customers> entry = db.Entry(customerEdit);
+                entry.State = System.Data.Entity.EntityState.Unchanged;
+                entry.Property("ContactName").IsModified = true;
+
+                //3.删除数据
+                Customers customerDel = new Customers { CustomerID = "test2" };
+
+                //4.附加到EF中
+                db.Customers.Attach(customerDel);
+                //5.标记为删除 -- 注意：此方法就是标记当前对象为删除状态
+                db.Customers.Remove(customerDel);
+
+                db.SaveChanges();
+                Console.WriteLine("批处理完成");
+            }
+        }
+
+        #endregion
+
+        #region 批处理2 一次性新增数据
+
+        static void BatcheAdd()
+        {
+            using (NorthwindEntities db = new NorthwindEntities())
+            {
+                for (int i = 0; i < 50; i++)
+                {
+                    Customers customer = new Customers
+                    {
+                        CustomerID = "Test" + i,
+                        Address = "重庆",
+                        City = "重庆",
+                        Phone = "136565689" + i / 10 + i % 10,
+                        CompanyName = "微软",
+                        ContactName = "User" + i
+                    };
+                    db.Customers.Add(customer);
+                }
+                db.SaveChanges();
+                Console.WriteLine("添加完成");
+            }
+        }
+
+        #endregion
+
     }
 }
