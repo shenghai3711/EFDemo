@@ -122,7 +122,7 @@ namespace EFCRUD
         }
 
         #endregion
-        
+
         #region 修改
 
         #region 官方推荐方式（先查询，再修改）
@@ -168,8 +168,8 @@ namespace EFCRUD
                 //4.设置该对象的ContactName属性为修改状态，同时entry.State 被修改为Modified状态
                 entry.Property("ContactName").IsModified = true;
 
-                var u = db.Customers.Attach(customer);
-                u.ContactName = "刘德华";
+                //var u = db.Customers.Attach(customer);
+                //u.ContactName = "刘德华";
                 //5.重新保存到数据库 -- EF上下文会根据实体对象的状态entry.State = Modified 值生成对应的 update sql 语句
                 db.SaveChanges();
                 Console.WriteLine("修改成功");
@@ -179,6 +179,31 @@ namespace EFCRUD
         }
 
         #endregion
+
+        #endregion
+
+        #region 删除
+
+        static void Delete()
+        {
+            using (NorthwindEntities db = new NorthwindEntities())
+            {
+                //1.创建要删除的对象
+                Customers customer = new Customers { CustomerID = "zouqj" };
+                //2.附加到EF中
+                db.Customers.Attach(customer);
+                //3.标记为删除 -- 注意：此方法就是标记当前对象为删除状态
+                db.Customers.Remove(customer);
+                /*
+                //也可以使用Entry来附加和删除
+                DbEntityEntry<Customers> entry = db.Entry(customer);
+                entry.State = System.Data.Entity.EntityState.Deleted;
+                */
+                //4.执行删除sql
+                db.SaveChanges();
+                Console.WriteLine("删除成功！");
+            }
+        }
 
         #endregion
 
