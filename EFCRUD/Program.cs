@@ -122,7 +122,65 @@ namespace EFCRUD
         }
 
         #endregion
+        
+        #region 修改
 
+        #region 官方推荐方式（先查询，再修改）
+
+        static void Edit1()
+        {
+            using (NorthwindEntities db = new NorthwindEntities())
+            {
+                //1.先查询出一个要修改的对象 -- 注意：此时返回的是一个Customers类的代理类对象（包装类对象）
+                Customers customer = db.Customers.Where(u => u.CustomerID == "zouqj").FirstOrDefault();
+                Console.WriteLine("修改前：" + customer.ContactName);
+                //2.修改内容 -- 注意：此时其实操作的是代理类对象的属性，这些属性会将值设置给内部的Customers对象对应的属性，同时标记此属性为已修改状态
+                customer.ContactName = "zsh";
+                //3.重新保存到数据库 -- 注意：此时EF上下文会检查容器内部所有的对象，先找到标记为修改的对象，然后找到标记为修改的对象属性，生成对应的update语句执行
+                db.SaveChanges();
+                Console.WriteLine("修改成功");
+                Console.WriteLine("修改后：" + customer.ContactName);
+            }
+        }
+
+        #endregion
+
+        #region 优化的修改方式（创建对象，直接）
+
+        static void Edit2()
+        {
+            //1.查询出一个要修改的对象
+            Customers customer = new Customers
+            {
+                CustomerID = "zouqj",
+                Address = "南山区新能源创新产业园",
+                City = "深圳",
+                Phone = "15623568989",
+                CompanyName = "深圳跨境翼电商商务有限公司",
+                ContactName = "zsh"
+            };
+            using (NorthwindEntities db = new NorthwindEntities())
+            {
+                //2.将对象加入EF容器，并获取当前实体对象的状态管理对象
+                DbEntityEntry<Customers> entry = db.Entry(customer);
+                //3.设置该对象为被修改过
+                entry.State = System.Data.Entity.EntityState.Unchanged;
+                //4.设置该对象的ContactName属性为修改状态，同时entry.State 被修改为Modified状态
+                entry.Property("ContactName").IsModified = true;
+
+                var u = db.Customers.Attach(customer);
+                u.ContactName = "刘德华";
+                //5.重新保存到数据库 -- EF上下文会根据实体对象的状态entry.State = Modified 值生成对应的 update sql 语句
+                db.SaveChanges();
+                Console.WriteLine("修改成功");
+                Console.WriteLine(customer.ContactName);
+            }
+
+        }
+
+        #endregion
+
+        #endregion
 
     }
 }
